@@ -60,3 +60,59 @@ func TestCommand_EncodeWithCRC(t *testing.T) {
 	expectedCRC := byte(0xFE) ^ byte(0xFE) ^ byte(0x03) ^ byte(0x10)
 	assert.Equal(t, expectedCRC, data[4])
 }
+
+func TestDecode_ValidResponse(t *testing.T) {
+	// Simulate response: [FE FE 05 20 01 02 03 FA]
+	data := []byte{0xFE, 0xFE, 0x05, 0x20, 0x01, 0x02, 0x03, 0xFA}
+
+	resp, err := Decode(data, false)
+	require.NoError(t, err)
+
+	assert.Equal(t, byte(0x20), resp.Code)
+	assert.Equal(t, []byte{0x01, 0x02, 0x03}, resp.Data)
+}
+
+func TestDecode_ValidResponseWithCRC(t *testing.T) {
+	// Build valid CRC response
+	packet := []byte{0xFE, 0xFE, 0x04, 0x12, 0xAA}
+	crc := calculateCRC(packet)
+	data := append(packet, crc)
+
+	resp, err := Decode(data, true)
+	require.NoError(t, err)
+
+	assert.Equal(t, byte(0x12), resp.Code)
+	assert.Equal(t, []byte{0xAA}, resp.Data)
+}
+
+func TestDecode_InvalidHeader(t *testing.T) {
+	data := []byte{0xAA, 0xFE, 0x02, 0x10, 0xFA}
+
+	_, err := Decode(data, false)
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "invalid header")
+}
+
+func TestDecode_TooShort(t *testing.T) {
+	data := []byte{0xFE, 0xFE}
+
+	_, err := Decode(data, false)
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "too short")
+}
+
+func TestDecode_InvalidCRC(t *testing.T) {
+	data := []byte{0xFE, 0xFE, 0x03, 0x10, 0xFF} // wrong CRC
+
+	_, err := Decode(data, true)
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "CRC mismatch")
+}
+
+func TestDecode_InvalidFooter(t *testing.T) {
+	data := []byte{0xFE, 0xFE, 0x02, 0x10, 0xAA} // wrong footer
+
+	_, err := Decode(data, false)
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "invalid footer")
+}
