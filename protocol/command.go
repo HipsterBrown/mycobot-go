@@ -1,6 +1,9 @@
 package protocol
 
-import "fmt"
+import (
+	"encoding/binary"
+	"fmt"
+)
 
 // Command represents a protocol command to send to the robot
 type Command struct {
@@ -130,4 +133,59 @@ func Decode(data []byte, useCRC bool) (*Response, error) {
 		Code: code,
 		Data: payload,
 	}, nil
+}
+
+// EncodeInt16 encodes an integer as big-endian int16
+func EncodeInt16(value int) []byte {
+	buf := make([]byte, 2)
+	binary.BigEndian.PutUint16(buf, uint16(value))
+	return buf
+}
+
+// EncodeAngles encodes angles in degrees to wire format
+// Each angle is converted to int16 (angle * 100) for precision
+func EncodeAngles(angles []float64) []byte {
+	data := make([]byte, 0, len(angles)*2)
+	for _, angle := range angles {
+		value := int16(angle * 100)
+		data = append(data, EncodeInt16(int(value))...)
+	}
+	return data
+}
+
+// DecodeAngles decodes wire format back to angles in degrees
+func DecodeAngles(data []byte) ([]float64, error) {
+	if len(data)%2 != 0 {
+		return nil, fmt.Errorf("invalid angle data length: %d", len(data))
+	}
+
+	count := len(data) / 2
+	angles := make([]float64, count)
+
+	for i := 0; i < count; i++ {
+		value := int16(binary.BigEndian.Uint16(data[i*2 : i*2+2]))
+		angles[i] = float64(value) / 100.0
+	}
+
+	return angles, nil
+}
+
+// EncodeCoords encodes coordinates (x, y, z, rx, ry, rz) to wire format
+func EncodeCoords(x, y, z, rx, ry, rz float64) []byte {
+	coords := []float64{x, y, z, rx, ry, rz}
+	return EncodeAngles(coords)
+}
+
+// DecodeCoords decodes wire format back to coordinates
+func DecodeCoords(data []byte) (x, y, z, rx, ry, rz float64, err error) {
+	coords, err := DecodeAngles(data)
+	if err != nil {
+		return 0, 0, 0, 0, 0, 0, err
+	}
+
+	if len(coords) != 6 {
+		return 0, 0, 0, 0, 0, 0, fmt.Errorf("invalid coord data: expected 6 values, got %d", len(coords))
+	}
+
+	return coords[0], coords[1], coords[2], coords[3], coords[4], coords[5], nil
 }
