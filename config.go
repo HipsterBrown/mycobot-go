@@ -1,6 +1,6 @@
 package mycobot
 
-import "github.com/yourusername/mycobot-go/types"
+import "github.com/hipsterbrown/mycobot-go/types"
 
 // ModelConfig defines model-specific parameters
 type ModelConfig struct {

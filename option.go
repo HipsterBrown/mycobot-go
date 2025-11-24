@@ -2,7 +2,7 @@ package mycobot
 
 import (
 	"time"
-	"github.com/yourusername/mycobot-go/internal/robot"
+	"github.com/hipsterbrown/mycobot-go/internal/robot"
 )
 
 // Option configures a robot

@@ -3,9 +3,9 @@ package mycobot
 import (
 	"context"
 
-	"github.com/yourusername/mycobot-go/internal/robot"
-	"github.com/yourusername/mycobot-go/protocol"
-	"github.com/yourusername/mycobot-go/types"
+	"github.com/hipsterbrown/mycobot-go/internal/robot"
+	"github.com/hipsterbrown/mycobot-go/protocol"
+	"github.com/hipsterbrown/mycobot-go/types"
 )
 
 // MyCobot280 represents a MyCobot 280 robot

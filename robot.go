@@ -3,7 +3,7 @@ package mycobot
 import (
 	"context"
 
-	"github.com/yourusername/mycobot-go/types"
+	"github.com/hipsterbrown/mycobot-go/types"
 )
 
 // Robot is the base interface all robot models implement

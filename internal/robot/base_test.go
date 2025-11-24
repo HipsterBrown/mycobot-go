@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/yourusername/mycobot-go/protocol"
+	"github.com/hipsterbrown/mycobot-go/protocol"
 )
 
 func TestNewBase(t *testing.T) {

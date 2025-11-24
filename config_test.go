@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/yourusername/mycobot-go/types"
+	"github.com/hipsterbrown/mycobot-go/types"
 )
 
 func TestModelConfig_MyCobot280(t *testing.T) {

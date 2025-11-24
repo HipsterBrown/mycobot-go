@@ -8,8 +8,8 @@ import (
 	"time"
 
 	"go.bug.st/serial"
-	"github.com/yourusername/mycobot-go/internal/errors"
-	"github.com/yourusername/mycobot-go/protocol"
+	"github.com/hipsterbrown/mycobot-go/internal/errors"
+	"github.com/hipsterbrown/mycobot-go/protocol"
 )
 
 // Base provides common robot functionality

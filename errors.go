@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 
-	internalerrors "github.com/yourusername/mycobot-go/internal/errors"
+	internalerrors "github.com/hipsterbrown/mycobot-go/internal/errors"
 )
 
 // Standard errors

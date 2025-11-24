@@ -20,7 +20,7 @@ Go library for controlling Elephant Robotics myCobot series robotic arms.
 ## Installation
 
 ```bash
-go get github.com/yourusername/mycobot-go
+go get github.com/hipsterbrown/mycobot-go
 ```
 
 ## Quick Start
@@ -32,8 +32,8 @@ import (
     "context"
     "log"
 
-    "github.com/yourusername/mycobot-go"
-    "github.com/yourusername/mycobot-go/types"
+    "github.com/hipsterbrown/mycobot-go"
+    "github.com/hipsterbrown/mycobot-go/types"
 )
 
 func main() {

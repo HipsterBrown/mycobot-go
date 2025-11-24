@@ -24,7 +24,7 @@
 
 Run:
 ```bash
-go mod init github.com/yourusername/mycobot-go
+go mod init github.com/hipsterbrown/mycobot-go
 ```
 
 Expected: Creates `go.mod` with module name
@@ -105,7 +105,7 @@ Go library for controlling Elephant Robotics myCobot series robotic arms.
 ## Installation
 
 ```bash
-go get github.com/yourusername/mycobot-go
+go get github.com/hipsterbrown/mycobot-go
 ```
 
 ## Quick Start
@@ -117,8 +117,8 @@ import (
     "context"
     "log"
 
-    "github.com/yourusername/mycobot-go"
-    "github.com/yourusername/mycobot-go/types"
+    "github.com/hipsterbrown/mycobot-go"
+    "github.com/hipsterbrown/mycobot-go/types"
 )
 
 func main() {
@@ -1435,7 +1435,7 @@ package mycobot
 import (
 	"context"
 
-	"github.com/yourusername/mycobot-go/types"
+	"github.com/hipsterbrown/mycobot-go/types"
 )
 
 // Robot is the base interface all robot models implement
@@ -1490,7 +1490,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/yourusername/mycobot-go/types"
+	"github.com/hipsterbrown/mycobot-go/types"
 )
 
 func TestModelConfig_MyCobot280(t *testing.T) {
@@ -1535,7 +1535,7 @@ Create `config.go`:
 ```go
 package mycobot
 
-import "github.com/yourusername/mycobot-go/types"
+import "github.com/hipsterbrown/mycobot-go/types"
 
 // ModelConfig defines model-specific parameters
 type ModelConfig struct {
@@ -1646,7 +1646,7 @@ import (
 	"sync"
 
 	"go.bug.st/serial"
-	"github.com/yourusername/mycobot-go/protocol"
+	"github.com/hipsterbrown/mycobot-go/protocol"
 )
 
 // Base provides common robot functionality
@@ -1850,7 +1850,7 @@ Add to `internal/robot/base.go`:
 ```go
 import (
 	"io"
-	"github.com/yourusername/mycobot-go/protocol"
+	"github.com/hipsterbrown/mycobot-go/protocol"
 )
 
 // readResponse reads and decodes response from serial port
@@ -1895,7 +1895,7 @@ func (b *Base) readResponse(ctx context.Context, expectedCode byte) ([]byte, err
 Add to `internal/robot/base.go`:
 ```go
 import (
-	mycobot "github.com/yourusername/mycobot-go"
+	mycobot "github.com/hipsterbrown/mycobot-go"
 )
 
 // SendCommand queues a command and waits for response
@@ -1977,7 +1977,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/yourusername/mycobot-go/types"
+	"github.com/hipsterbrown/mycobot-go/types"
 )
 
 func TestNewMyCobot280(t *testing.T) {
@@ -2016,7 +2016,7 @@ package mycobot
 
 import (
 	"time"
-	"github.com/yourusername/mycobot-go/internal/robot"
+	"github.com/hipsterbrown/mycobot-go/internal/robot"
 )
 
 // Option configures a robot
@@ -2047,9 +2047,9 @@ package mycobot
 import (
 	"context"
 
-	"github.com/yourusername/mycobot-go/internal/robot"
-	"github.com/yourusername/mycobot-go/protocol"
-	"github.com/yourusername/mycobot-go/types"
+	"github.com/hipsterbrown/mycobot-go/internal/robot"
+	"github.com/hipsterbrown/mycobot-go/protocol"
+	"github.com/hipsterbrown/mycobot-go/types"
 )
 
 // MyCobot280 represents a MyCobot 280 robot

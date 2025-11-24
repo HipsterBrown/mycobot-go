@@ -115,7 +115,7 @@ Separate `protocol` package for advanced users and debugging:
 robot.SendAngles(ctx, angles, speed)
 
 // Advanced - direct protocol access
-import "github.com/yourusername/mycobot-go/protocol"
+import "github.com/hipsterbrown/mycobot-go/protocol"
 cmd := protocol.NewCommand(protocol.SEND_ANGLES, data)
 robot.SendCommand(ctx, cmd)
 ```
@@ -584,8 +584,8 @@ import (
     "log"
     "time"
 
-    "github.com/yourusername/mycobot-go"
-    "github.com/yourusername/mycobot-go/types"
+    "github.com/hipsterbrown/mycobot-go"
+    "github.com/hipsterbrown/mycobot-go/types"
 )
 
 func main() {
@@ -623,7 +623,7 @@ func main() {
 ### Gripper Usage
 
 ```go
-import "github.com/yourusername/mycobot-go/gripper"
+import "github.com/hipsterbrown/mycobot-go/gripper"
 
 robot := mycobot.NewMyCobot280("/dev/ttyUSB0")
 robot.Open(ctx)
@@ -669,7 +669,7 @@ wg.Wait()
 ### Advanced Protocol Usage
 
 ```go
-import "github.com/yourusername/mycobot-go/protocol"
+import "github.com/hipsterbrown/mycobot-go/protocol"
 
 // Send custom command not yet in high-level API
 cmd := protocol.NewCommandWithData(0xAB, []byte{0x01, 0x02})
