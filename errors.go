@@ -3,13 +3,15 @@ package mycobot
 import (
 	"errors"
 	"fmt"
+
+	internalerrors "github.com/yourusername/mycobot-go/internal/errors"
 )
 
 // Standard errors
 var (
-	// Connection errors
-	ErrRobotClosed       = errors.New("robot connection closed")
-	ErrNotConnected      = errors.New("robot not connected")
+	// Connection errors (re-exported from internal/errors)
+	ErrRobotClosed       = internalerrors.ErrRobotClosed
+	ErrNotConnected      = internalerrors.ErrNotConnected
 	ErrConnectionTimeout = errors.New("connection timeout")
 
 	// Command errors

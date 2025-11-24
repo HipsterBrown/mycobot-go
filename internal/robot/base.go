@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"go.bug.st/serial"
-	mycobot "github.com/yourusername/mycobot-go"
+	"github.com/yourusername/mycobot-go/internal/errors"
 	"github.com/yourusername/mycobot-go/protocol"
 )
 
@@ -170,7 +170,7 @@ func (b *Base) readResponse(ctx context.Context, expectedCode byte) ([]byte, err
 // SendCommand queues a command and waits for response
 func (b *Base) SendCommand(ctx context.Context, cmd protocol.Command) ([]byte, error) {
 	if !b.IsConnected() {
-		return nil, mycobot.ErrNotConnected
+		return nil, errors.ErrNotConnected
 	}
 
 	responseChan := make(chan *response, 1)
@@ -187,7 +187,7 @@ func (b *Base) SendCommand(ctx context.Context, cmd protocol.Command) ([]byte, e
 		return nil, ctx.Err()
 
 	case <-b.closeChan:
-		return nil, mycobot.ErrRobotClosed
+		return nil, errors.ErrRobotClosed
 	}
 
 	// Wait for response
