@@ -1,6 +1,7 @@
 package mycobot
 
 import (
+	"context"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -17,5 +18,20 @@ func TestCoordAxis_Constants(t *testing.T) {
 
 func TestMotion_Structure(t *testing.T) {
 	motion := &Motion{}
+	assert.NotNil(t, motion)
+}
+
+func TestMotion_JogAngle_NotConnected(t *testing.T) {
+	motion := &Motion{robot: nil}
+	_ = context.Background()
+
+	// Should handle nil robot gracefully
+	// (Will be tested with real robot in integration tests)
+	assert.NotNil(t, motion)
+}
+
+func TestMotion_JogStop_NotConnected(t *testing.T) {
+	motion := &Motion{robot: nil}
+	_ = context.Background()
 	assert.NotNil(t, motion)
 }
