@@ -14,12 +14,12 @@ func TestAngle_ValidateForJoint(t *testing.T) {
 		model       Model
 		expectError bool
 	}{
-		{"valid within range", Angle(45), Joint1, ModelMyCobot280, false},
-		{"valid at min", Angle(-165), Joint1, ModelMyCobot280, false},
-		{"valid at max", Angle(165), Joint1, ModelMyCobot280, false},
-		{"below min", Angle(-170), Joint1, ModelMyCobot280, true},
-		{"above max", Angle(170), Joint1, ModelMyCobot280, true},
-		{"different joint", Angle(170), Joint6, ModelMyCobot280, false}, // Joint6 has different limits
+		{"valid within range", Angle(45), Joint1, ModelMechArm270, false},
+		{"valid at min", Angle(-165), Joint1, ModelMechArm270, false},
+		{"valid at max", Angle(165), Joint1, ModelMechArm270, false},
+		{"below min", Angle(-170), Joint1, ModelMechArm270, true},
+		{"above max", Angle(170), Joint1, ModelMechArm270, true},
+		{"different joint", Angle(170), Joint6, ModelMechArm270, false}, // Joint6 has different limits
 	}
 
 	for _, tt := range tests {
@@ -39,13 +39,13 @@ func TestAngles_Validate(t *testing.T) {
 	invalidLengthAngles := Angles{0, 45, -90} // only 3 angles
 	invalidValueAngles := Angles{0, 45, -200, 30, -45, 90} // -200 out of range
 
-	err := validAngles.Validate(6, ModelMyCobot280)
+	err := validAngles.Validate(6, ModelMechArm270)
 	assert.NoError(t, err)
 
-	err = invalidLengthAngles.Validate(6, ModelMyCobot280)
+	err = invalidLengthAngles.Validate(6, ModelMechArm270)
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "expected 6 angles")
 
-	err = invalidValueAngles.Validate(6, ModelMyCobot280)
+	err = invalidValueAngles.Validate(6, ModelMechArm270)
 	assert.Error(t, err)
 }

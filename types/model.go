@@ -27,22 +27,6 @@ func getJointLimits(model Model, joint JointID) JointLimit {
 }
 
 var modelJointLimits = map[Model][]JointLimit{
-	ModelMyCobot280: {
-		{MinAngle: -165, MaxAngle: 165}, // Joint 1
-		{MinAngle: -165, MaxAngle: 165}, // Joint 2
-		{MinAngle: -165, MaxAngle: 165}, // Joint 3
-		{MinAngle: -165, MaxAngle: 165}, // Joint 4
-		{MinAngle: -165, MaxAngle: 165}, // Joint 5
-		{MinAngle: -175, MaxAngle: 175}, // Joint 6
-	},
-	ModelMyCobot320: {
-		{MinAngle: -170, MaxAngle: 170}, // Joint 1
-		{MinAngle: -137, MaxAngle: 137}, // Joint 2
-		{MinAngle: -150, MaxAngle: 150}, // Joint 3
-		{MinAngle: -145, MaxAngle: 145}, // Joint 4
-		{MinAngle: -165, MaxAngle: 165}, // Joint 5
-		{MinAngle: -180, MaxAngle: 180}, // Joint 6
-	},
 	ModelMechArm270: {
 		{MinAngle: -165, MaxAngle: 165},
 		{MinAngle: -165, MaxAngle: 165},
@@ -50,11 +34,5 @@ var modelJointLimits = map[Model][]JointLimit{
 		{MinAngle: -165, MaxAngle: 165},
 		{MinAngle: -165, MaxAngle: 165},
 		{MinAngle: -175, MaxAngle: 175},
-	},
-	ModelMyPalletizer260: {
-		{MinAngle: -165, MaxAngle: 165},
-		{MinAngle: -90, MaxAngle: 90},
-		{MinAngle: -90, MaxAngle: 90},
-		{MinAngle: -165, MaxAngle: 165},
 	},
 }
