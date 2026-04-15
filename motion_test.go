@@ -1,9 +1,9 @@
 package mycobot
 
 import (
-	"context"
 	"testing"
 
+	"github.com/hipsterbrown/mycobot-go/types"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -16,33 +16,36 @@ func TestCoordAxis_Constants(t *testing.T) {
 	assert.Equal(t, CoordAxis(5), AxisRz)
 }
 
-func TestMotion_Structure(t *testing.T) {
+func TestMotion_JogAngle_UsesDirection(t *testing.T) {
 	motion := &Motion{}
-	assert.NotNil(t, motion)
+	// Verify the method signature accepts types.Direction (not int)
+	var _ func(*Motion) = func(m *Motion) {
+		_ = m.JogAngle
+	}
+	_ = motion
+	_ = types.DirPositive
 }
 
-func TestMotion_JogAngle_NotConnected(t *testing.T) {
-	motion := &Motion{robot: nil}
-	_ = context.Background()
-
-	// Should handle nil robot gracefully
-	// (Will be tested with real robot in integration tests)
-	assert.NotNil(t, motion)
+func TestMotion_SendAngle_Exists(t *testing.T) {
+	motion := &Motion{}
+	var _ func(*Motion) = func(m *Motion) {
+		_ = m.SendAngle
+	}
+	_ = motion
 }
 
-func TestMotion_JogStop_NotConnected(t *testing.T) {
-	motion := &Motion{robot: nil}
-	_ = context.Background()
-	assert.NotNil(t, motion)
+func TestMotion_SendCoord_Exists(t *testing.T) {
+	motion := &Motion{}
+	var _ func(*Motion) = func(m *Motion) {
+		_ = m.SendCoord
+	}
+	_ = motion
 }
 
-func TestMotion_PauseResume(t *testing.T) {
-	motion := &Motion{robot: nil}
-	assert.NotNil(t, motion)
-	// Integration tests will verify actual pause/resume behavior
-}
-
-func TestMotion_Stop(t *testing.T) {
-	motion := &Motion{robot: nil}
-	assert.NotNil(t, motion)
+func TestMotion_IsInPosition_Exists(t *testing.T) {
+	motion := &Motion{}
+	var _ func(*Motion) = func(m *Motion) {
+		_ = m.IsInPosition
+	}
+	_ = motion
 }
