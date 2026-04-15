@@ -2,10 +2,21 @@ package mycobot
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/hipsterbrown/mycobot-go/internal/robot"
 	"github.com/hipsterbrown/mycobot-go/protocol"
 	"github.com/hipsterbrown/mycobot-go/types"
+)
+
+// PositionFlag specifies whether IsInPosition checks angles or coordinates
+type PositionFlag int
+
+const (
+	// PositionAngles checks joint angles
+	PositionAngles PositionFlag = 0
+	// PositionCoords checks coordinates
+	PositionCoords PositionFlag = 1
 )
 
 // CoordAxis represents a coordinate axis for single-axis movement
@@ -53,7 +64,7 @@ func (m *Motion) JogCoord(ctx context.Context, axis CoordAxis, direction types.D
 		return err
 	}
 
-	data := []byte{byte(axis), byte(direction), byte(speed)}
+	data := []byte{byte(axis + 1), byte(direction), byte(speed)}
 	cmd := protocol.Command{
 		Code: protocol.JogCoord,
 		Data: data,
@@ -150,16 +161,14 @@ func (m *Motion) SendCoord(ctx context.Context, axis CoordAxis, value float64, s
 }
 
 // IsInPosition checks if the robot is at the target position.
-// flag: 0 = check angles, 1 = check coordinates
-func (m *Motion) IsInPosition(ctx context.Context, data []float64, flag int) (bool, error) {
+// Use PositionAngles to check joint angles or PositionCoords to check coordinates.
+func (m *Motion) IsInPosition(ctx context.Context, data []float64, flag PositionFlag) (bool, error) {
 	var encoded []byte
-	if flag == 0 {
-		// Angles: encode with * 100
+	if flag == PositionAngles {
 		encoded = protocol.EncodeAngles(data)
 	} else {
-		// Coordinates: encode with split multiplier
 		if len(data) != 6 {
-			return false, nil
+			return false, fmt.Errorf("expected 6 coordinate values, got %d", len(data))
 		}
 		encoded = protocol.EncodeCoords(data[0], data[1], data[2], data[3], data[4], data[5])
 	}

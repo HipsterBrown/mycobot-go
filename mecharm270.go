@@ -8,6 +8,9 @@ import (
 	"github.com/hipsterbrown/mycobot-go/types"
 )
 
+// Compile-time check that MechArm270 implements Robot
+var _ Robot = (*MechArm270)(nil)
+
 // MechArm270 represents a MechArm 270 robot
 type MechArm270 struct {
 	Motion *Motion
