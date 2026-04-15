@@ -26,6 +26,15 @@ func TestAtomIOCodes_MatchPymycobot(t *testing.T) {
 	assert.Equal(t, byte(0x6A), SetColor)
 }
 
+func TestGripperCodes_MatchPymycobot(t *testing.T) {
+	// Gripper codes per pymycobot common.py ProtocolCode class
+	assert.Equal(t, byte(0x65), GetGripperValue)
+	assert.Equal(t, byte(0x66), SetGripperState)
+	assert.Equal(t, byte(0x67), SetGripperValue)
+	assert.Equal(t, byte(0x68), SetGripperIni)
+	assert.Equal(t, byte(0x69), IsGripperMoving)
+}
+
 func TestBasicIOCodes_MatchPymycobot(t *testing.T) {
 	// Basic IO codes per pymycobot common.py ProtocolCode class
 	assert.Equal(t, byte(0xA0), SetBasicOutput)
