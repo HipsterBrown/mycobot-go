@@ -77,23 +77,30 @@ const (
 	FocusServo          byte = 0x57
 )
 
-// Atom IO
+// Atom IO (end-effector head, 0x60 range)
+// Codes from pymycobot common.py ProtocolCode class
 const (
-	SetColor            byte = 0x6A
-	SetDigitalOutput    byte = 0xA0
-	GetDigitalInput     byte = 0xA1
-	SetPWMOutput        byte = 0xA2
-	GetGripperValue     byte = 0x67
-	SetGripperState     byte = 0x68
-	SetGripperValue     byte = 0x66
-	SetGripperIni       byte = 0x69
-	IsGripperMoving     byte = 0x6B
+	SetPinMode       byte = 0x60
+	SetDigitalOutput byte = 0x61
+	GetDigitalInput  byte = 0x62
+	SetPWMMode       byte = 0x63
+	SetPWMOutput     byte = 0x64
+	SetColor         byte = 0x6A
 )
 
-// Basic IO
+// Gripper commands
 const (
-	SetBasicOutput      byte = 0xA0
-	GetBasicInput       byte = 0xA1
+	GetGripperValue byte = 0x65
+	SetGripperState byte = 0x66
+	SetGripperValue byte = 0x67
+	SetGripperIni   byte = 0x68
+	IsGripperMoving byte = 0x69
+)
+
+// Basic IO (base panel, 0xA0 range)
+const (
+	SetBasicOutput byte = 0xA0
+	GetBasicInput  byte = 0xA1
 )
 
 // Gripper extended
