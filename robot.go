@@ -16,7 +16,7 @@ type Robot interface {
 	// Core motion commands
 	SendAngles(ctx context.Context, angles types.Angles, speed types.Speed) error
 	GetAngles(ctx context.Context) (types.Angles, error)
-	SendCoords(ctx context.Context, coord types.Coord, speed types.Speed) error
+	SendCoords(ctx context.Context, coord types.Coord, speed types.Speed, mode types.CoordMode) error
 	GetCoords(ctx context.Context) (types.Coord, error)
 
 	// Power and status
@@ -26,5 +26,4 @@ type Robot interface {
 
 	// Movement queries
 	IsMoving(ctx context.Context) (bool, error)
-	IsInPosition(ctx context.Context, target types.Coord, tolerance float64) (bool, error)
 }
