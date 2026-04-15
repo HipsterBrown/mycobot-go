@@ -9,7 +9,7 @@ import (
 type Command struct {
 	Code   byte
 	Data   []byte
-	UseCRC bool // true for newer models (MyCobot280, 320), false for older
+	UseCRC bool // when true, uses XOR checksum instead of 0xFA footer
 }
 
 // NewCommand creates a command without data

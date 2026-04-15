@@ -38,7 +38,7 @@ var (
 // RobotError wraps errors with operation and model context
 type RobotError struct {
 	Op    string // Operation that failed (e.g., "SendAngles")
-	Model string // Robot model (e.g., "MyCobot280")
+	Model string // Robot model (e.g., "MechArm270")
 	Err   error  // Underlying error
 }
 
