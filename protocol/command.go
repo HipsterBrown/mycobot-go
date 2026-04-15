@@ -170,22 +170,42 @@ func DecodeAngles(data []byte) ([]float64, error) {
 	return angles, nil
 }
 
-// EncodeCoords encodes coordinates (x, y, z, rx, ry, rz) to wire format
+// EncodeCoords encodes coordinates (x, y, z, rx, ry, rz) to wire format.
+// XYZ positions are encoded as int16 (value * 10) per pymycobot _coord2int.
+// Rx/Ry/Rz rotations are encoded as int16 (value * 100) per pymycobot _angle2int.
 func EncodeCoords(x, y, z, rx, ry, rz float64) []byte {
-	coords := []float64{x, y, z, rx, ry, rz}
-	return EncodeAngles(coords)
+	data := make([]byte, 0, 12)
+	// XYZ: multiply by 10
+	for _, v := range []float64{x, y, z} {
+		data = append(data, EncodeInt16(int(v*10))...)
+	}
+	// Rx/Ry/Rz: multiply by 100
+	for _, v := range []float64{rx, ry, rz} {
+		data = append(data, EncodeInt16(int(v*100))...)
+	}
+	return data
 }
 
-// DecodeCoords decodes wire format back to coordinates
+// DecodeCoords decodes wire format back to coordinates.
+// XYZ are decoded with divisor 10, Rx/Ry/Rz with divisor 100.
 func DecodeCoords(data []byte) (x, y, z, rx, ry, rz float64, err error) {
-	coords, err := DecodeAngles(data)
-	if err != nil {
-		return 0, 0, 0, 0, 0, 0, err
+	if len(data) != 12 {
+		return 0, 0, 0, 0, 0, 0, fmt.Errorf("invalid coord data: expected 12 bytes, got %d", len(data))
 	}
 
-	if len(coords) != 6 {
-		return 0, 0, 0, 0, 0, 0, fmt.Errorf("invalid coord data: expected 6 values, got %d", len(coords))
+	// XYZ: divide by 10
+	xyz := make([]float64, 3)
+	for i := 0; i < 3; i++ {
+		value := int16(binary.BigEndian.Uint16(data[i*2 : i*2+2]))
+		xyz[i] = float64(value) / 10.0
 	}
 
-	return coords[0], coords[1], coords[2], coords[3], coords[4], coords[5], nil
+	// Rx/Ry/Rz: divide by 100
+	rot := make([]float64, 3)
+	for i := 0; i < 3; i++ {
+		value := int16(binary.BigEndian.Uint16(data[6+i*2 : 6+i*2+2]))
+		rot[i] = float64(value) / 100.0
+	}
+
+	return xyz[0], xyz[1], xyz[2], rot[0], rot[1], rot[2], nil
 }

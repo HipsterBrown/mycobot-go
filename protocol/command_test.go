@@ -181,30 +181,31 @@ func TestDecodeAngles_InvalidLength(t *testing.T) {
 }
 
 func TestEncodeCoords(t *testing.T) {
-	// Test encoding coordinates
-	data := EncodeCoords(100.5, -50.25, 200.0, 45.0, -30.5, 90.25)
+	// pymycobot encodes XYZ with _coord2int (value * 10)
+	// and Rx/Ry/Rz with _angle2int (value * 100)
+	data := EncodeCoords(100.5, -50.2, 200.0, 45.0, -30.5, 90.25)
 
-	// Each coord encoded as int16 (value * 100)
-	// 100.5 -> 10050, -50.25 -> -5025, 200.0 -> 20000
-	// 45.0 -> 4500, -30.5 -> -3050, 90.25 -> 9025
 	expected := []byte{
-		0x27, 0x42, // 10050
-		0xEC, 0x5F, // -5025
-		0x4E, 0x20, // 20000
-		0x11, 0x94, // 4500
-		0xF4, 0x16, // -3050
-		0x23, 0x41, // 9025
+		// XYZ: value * 10, big-endian int16
+		0x03, 0xED, // 100.5 * 10 = 1005
+		0xFE, 0x0A, // -50.2 * 10 = -502
+		0x07, 0xD0, // 200.0 * 10 = 2000
+		// Rx/Ry/Rz: value * 100, big-endian int16
+		0x11, 0x94, // 45.0 * 100 = 4500
+		0xF4, 0x16, // -30.5 * 100 = -3050
+		0x23, 0x41, // 90.25 * 100 = 9025
 	}
 
 	assert.Equal(t, expected, data)
 }
 
 func TestDecodeCoords(t *testing.T) {
-	// Data represents: [100.5, -50.25, 200.0, 45.0, -30.5, 90.25]
 	data := []byte{
-		0x27, 0x42, // 10050
-		0xEC, 0x5F, // -5025
-		0x4E, 0x20, // 20000
+		// XYZ: encoded with * 10
+		0x03, 0xED, // 1005
+		0xFE, 0x0A, // -502
+		0x07, 0xD0, // 2000
+		// Rx/Ry/Rz: encoded with * 100
 		0x11, 0x94, // 4500
 		0xF4, 0x16, // -3050
 		0x23, 0x41, // 9025
@@ -213,19 +214,19 @@ func TestDecodeCoords(t *testing.T) {
 	x, y, z, rx, ry, rz, err := DecodeCoords(data)
 	require.NoError(t, err)
 
-	assert.InDelta(t, 100.5, x, 0.01)
-	assert.InDelta(t, -50.25, y, 0.01)
-	assert.InDelta(t, 200.0, z, 0.01)
+	assert.InDelta(t, 100.5, x, 0.1)
+	assert.InDelta(t, -50.2, y, 0.1)
+	assert.InDelta(t, 200.0, z, 0.1)
 	assert.InDelta(t, 45.0, rx, 0.01)
 	assert.InDelta(t, -30.5, ry, 0.01)
 	assert.InDelta(t, 90.25, rz, 0.01)
 }
 
 func TestDecodeCoords_InvalidLength(t *testing.T) {
-	// Only 4 values instead of 6
+	// Only 8 bytes instead of 12
 	data := []byte{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}
 
 	_, _, _, _, _, _, err := DecodeCoords(data)
 	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "expected 6 values")
+	assert.Contains(t, err.Error(), "expected 12 bytes")
 }
