@@ -4,10 +4,7 @@ Go library for controlling Elephant Robotics myCobot series robotic arms.
 
 ## Supported Models
 
-- MyCobot 280
-- MyCobot 320
 - MechArm 270
-- MyPalletizer 260
 
 ## Features
 
@@ -37,16 +34,16 @@ import (
 )
 
 func main() {
-    robot := mycobot.NewMyCobot280("/dev/ttyUSB0")
+    arm := mycobot.NewMechArm270("/dev/ttyUSB0")
     ctx := context.Background()
 
-    if err := robot.Open(ctx); err != nil {
+    if err := arm.Open(ctx); err != nil {
         log.Fatal(err)
     }
-    defer robot.Close()
+    defer arm.Close()
 
-    robot.PowerOn(ctx)
-    robot.SendAngles(ctx, types.Angles{0, 0, 0, 0, 0, 0}, types.SpeedMedium)
+    arm.PowerOn(ctx)
+    arm.SendAngles(ctx, types.Angles{0, 0, 0, 0, 0, 0}, types.SpeedMedium)
 }
 ```
 

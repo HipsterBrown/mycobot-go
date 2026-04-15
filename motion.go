@@ -64,3 +64,38 @@ func (m *Motion) JogStop(ctx context.Context) error {
 	_, err := m.robot.SendCommand(ctx, cmd)
 	return err
 }
+
+// Pause pauses current movement
+func (m *Motion) Pause(ctx context.Context) error {
+	cmd := protocol.Command{Code: protocol.Pause}
+	_, err := m.robot.SendCommand(ctx, cmd)
+	return err
+}
+
+// Resume resumes paused movement
+func (m *Motion) Resume(ctx context.Context) error {
+	cmd := protocol.Command{Code: protocol.Resume}
+	_, err := m.robot.SendCommand(ctx, cmd)
+	return err
+}
+
+// Stop stops all movement
+func (m *Motion) Stop(ctx context.Context) error {
+	cmd := protocol.Command{Code: protocol.Stop}
+	_, err := m.robot.SendCommand(ctx, cmd)
+	return err
+}
+
+// IsPaused returns true if robot is paused
+func (m *Motion) IsPaused(ctx context.Context) (bool, error) {
+	cmd := protocol.Command{Code: protocol.IsPaused}
+	data, err := m.robot.SendCommand(ctx, cmd)
+	if err != nil {
+		return false, err
+	}
+
+	if len(data) > 0 {
+		return data[0] == 1, nil
+	}
+	return false, nil
+}
