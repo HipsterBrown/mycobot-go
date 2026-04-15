@@ -52,6 +52,16 @@ func NewBase(port string, baudrate int, useCRC bool) *Base {
 	}
 }
 
+// SetBaudRate sets the baud rate (must be called before Open)
+func (b *Base) SetBaudRate(baud int) {
+	b.baudrate = baud
+}
+
+// SetUseCRC enables or disables CRC mode
+func (b *Base) SetUseCRC(useCRC bool) {
+	b.useCRC = useCRC
+}
+
 // IsConnected returns true if robot is connected
 func (b *Base) IsConnected() bool {
 	b.mu.RLock()

@@ -10,12 +10,12 @@ import (
 func TestRobotError_Error(t *testing.T) {
 	err := &RobotError{
 		Op:    "SendAngles",
-		Model: "MyCobot280",
+		Model: "MechArm270",
 		Err:   ErrInvalidSpeed,
 	}
 
 	msg := err.Error()
-	assert.Contains(t, msg, "MyCobot280")
+	assert.Contains(t, msg, "MechArm270")
 	assert.Contains(t, msg, "SendAngles")
 	assert.Contains(t, msg, "speed")
 }
@@ -23,7 +23,7 @@ func TestRobotError_Error(t *testing.T) {
 func TestRobotError_Unwrap(t *testing.T) {
 	err := &RobotError{
 		Op:    "PowerOn",
-		Model: "MyCobot280",
+		Model: "MechArm270",
 		Err:   ErrConnectionTimeout,
 	}
 
