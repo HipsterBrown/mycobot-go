@@ -89,6 +89,9 @@ arm := mycobot.NewMechArm270("/dev/ttyUSB0", mycobot.WithBaudRate(1000000))
 
 // Enable CRC mode for firmware that requires it (default: off, uses 0xFA footer)
 arm := mycobot.NewMechArm270("/dev/ttyUSB0", mycobot.WithCRC())
+
+// Custom fallback timeout when ctx has no deadline (default: 1s)
+arm := mycobot.NewMechArm270("/dev/ttyUSB0", mycobot.WithDefaultTimeout(500*time.Millisecond))
 ```
 
 ### Motion (MDI + JOG)
