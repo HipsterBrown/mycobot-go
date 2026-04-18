@@ -33,8 +33,8 @@ type IO struct {
 // SetPinMode configures a pin as input, output, or input with pullup
 func (io *IO) SetPinMode(ctx context.Context, pin int, mode PinMode) error {
 	cmd := protocol.Command{
-		Code: protocol.SetPinMode,
-		Data: []byte{byte(pin), byte(mode)},
+		Code:     protocol.SetPinMode,
+		Data:     []byte{byte(pin), byte(mode)},
 	}
 	_, err := io.robot.SendCommand(ctx, cmd)
 	return err
@@ -43,8 +43,8 @@ func (io *IO) SetPinMode(ctx context.Context, pin int, mode PinMode) error {
 // SetDigitalOutput sets a digital pin high or low
 func (io *IO) SetDigitalOutput(ctx context.Context, pin int, signal PinSignal) error {
 	cmd := protocol.Command{
-		Code: protocol.SetDigitalOutput,
-		Data: []byte{byte(pin), byte(signal)},
+		Code:     protocol.SetDigitalOutput,
+		Data:     []byte{byte(pin), byte(signal)},
 	}
 	_, err := io.robot.SendCommand(ctx, cmd)
 	return err
@@ -53,8 +53,9 @@ func (io *IO) SetDigitalOutput(ctx context.Context, pin int, signal PinSignal) e
 // GetDigitalInput reads the state of a digital input pin
 func (io *IO) GetDigitalInput(ctx context.Context, pin int) (PinSignal, error) {
 	cmd := protocol.Command{
-		Code: protocol.GetDigitalInput,
-		Data: []byte{byte(pin)},
+		Code:     protocol.GetDigitalInput,
+		Data:     []byte{byte(pin)},
+		HasReply: true,
 	}
 	data, err := io.robot.SendCommand(ctx, cmd)
 	if err != nil {
@@ -69,8 +70,8 @@ func (io *IO) GetDigitalInput(ctx context.Context, pin int) (PinSignal, error) {
 // SetPWMMode configures a pin for PWM output
 func (io *IO) SetPWMMode(ctx context.Context, pin int) error {
 	cmd := protocol.Command{
-		Code: protocol.SetPWMMode,
-		Data: []byte{byte(pin)},
+		Code:     protocol.SetPWMMode,
+		Data:     []byte{byte(pin)},
 	}
 	_, err := io.robot.SendCommand(ctx, cmd)
 	return err
@@ -83,8 +84,8 @@ func (io *IO) SetPWMOutput(ctx context.Context, channel int, freq int, dutyCycle
 	}
 
 	cmd := protocol.Command{
-		Code: protocol.SetPWMOutput,
-		Data: []byte{byte(channel), byte(freq >> 8), byte(freq & 0xFF), byte(dutyCycle)},
+		Code:     protocol.SetPWMOutput,
+		Data:     []byte{byte(channel), byte(freq >> 8), byte(freq & 0xFF), byte(dutyCycle)},
 	}
 	_, err := io.robot.SendCommand(ctx, cmd)
 	return err
@@ -93,8 +94,8 @@ func (io *IO) SetPWMOutput(ctx context.Context, channel int, freq int, dutyCycle
 // SetColor sets the RGB color of the Atom LED
 func (io *IO) SetColor(ctx context.Context, r, g, b byte) error {
 	cmd := protocol.Command{
-		Code: protocol.SetColor,
-		Data: []byte{r, g, b},
+		Code:     protocol.SetColor,
+		Data:     []byte{r, g, b},
 	}
 	_, err := io.robot.SendCommand(ctx, cmd)
 	return err

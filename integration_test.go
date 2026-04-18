@@ -25,7 +25,7 @@ func getTestPort(t *testing.T) string {
 func setupArm(t *testing.T) *MechArm270 {
 	t.Helper()
 	port := getTestPort(t)
-	arm := NewMechArm270(port)
+	arm := NewMechArm270(port, WithBaudRate(1000000))
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()

@@ -1,10 +1,6 @@
 package mycobot
 
-import (
-	"time"
-
-	"github.com/hipsterbrown/mycobot-go/internal/robot"
-)
+import "github.com/hipsterbrown/mycobot-go/internal/robot"
 
 // Option configures a robot
 type Option func(*robot.Base)
@@ -13,13 +9,6 @@ type Option func(*robot.Base)
 func WithBaudRate(baud int) Option {
 	return func(b *robot.Base) {
 		b.SetBaudRate(baud)
-	}
-}
-
-// WithTimeout sets default command timeout
-func WithTimeout(timeout time.Duration) Option {
-	return func(b *robot.Base) {
-		// Will be implemented when we add timeout support
 	}
 }
 

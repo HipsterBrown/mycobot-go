@@ -75,7 +75,7 @@ func (m *MechArm270) PowerOff(ctx context.Context) error {
 
 // IsPowerOn returns true if robot is powered on
 func (m *MechArm270) IsPowerOn(ctx context.Context) (bool, error) {
-	cmd := protocol.Command{Code: protocol.IsPowerOn}
+	cmd := protocol.Command{Code: protocol.IsPowerOn, HasReply: true}
 	data, err := m.base.SendCommand(ctx, cmd)
 	if err != nil {
 		return false, err
@@ -99,8 +99,9 @@ func (m *MechArm270) SendAngles(ctx context.Context, angles types.Angles, speed 
 	data = append(data, byte(speed))
 
 	cmd := protocol.Command{
-		Code: protocol.SendAngles,
-		Data: data,
+		Code:     protocol.SendAngles,
+		Data:     data,
+		HasReply: true,
 	}
 	_, err := m.base.SendCommand(ctx, cmd)
 	return err
@@ -108,7 +109,7 @@ func (m *MechArm270) SendAngles(ctx context.Context, angles types.Angles, speed 
 
 // GetAngles retrieves current joint angles
 func (m *MechArm270) GetAngles(ctx context.Context) (types.Angles, error) {
-	cmd := protocol.Command{Code: protocol.GetAngles}
+	cmd := protocol.Command{Code: protocol.GetAngles, HasReply: true}
 	data, err := m.base.SendCommand(ctx, cmd)
 	if err != nil {
 		return nil, err
@@ -138,9 +139,12 @@ func (m *MechArm270) SendCoords(ctx context.Context, coord types.Coord, speed ty
 	data := protocol.EncodeCoords(coord.X, coord.Y, coord.Z, coord.Rx, coord.Ry, coord.Rz)
 	data = append(data, byte(speed), byte(mode))
 
+	// pymycobot sends SEND_COORDS with has_reply=False when a mode byte is
+	// present (see generate.py send_coords). We always include mode, so this
+	// is a fire-and-forget command.
 	cmd := protocol.Command{
-		Code: protocol.SendCoords,
-		Data: data,
+		Code:     protocol.SendCoords,
+		Data:     data,
 	}
 	_, err := m.base.SendCommand(ctx, cmd)
 	return err
@@ -148,7 +152,7 @@ func (m *MechArm270) SendCoords(ctx context.Context, coord types.Coord, speed ty
 
 // GetCoords retrieves current coordinate position
 func (m *MechArm270) GetCoords(ctx context.Context) (types.Coord, error) {
-	cmd := protocol.Command{Code: protocol.GetCoords}
+	cmd := protocol.Command{Code: protocol.GetCoords, HasReply: true}
 	data, err := m.base.SendCommand(ctx, cmd)
 	if err != nil {
 		return types.Coord{}, err
@@ -164,7 +168,7 @@ func (m *MechArm270) GetCoords(ctx context.Context) (types.Coord, error) {
 
 // IsMoving returns true if robot is currently moving
 func (m *MechArm270) IsMoving(ctx context.Context) (bool, error) {
-	cmd := protocol.Command{Code: protocol.IsMoving}
+	cmd := protocol.Command{Code: protocol.IsMoving, HasReply: true}
 	data, err := m.base.SendCommand(ctx, cmd)
 	if err != nil {
 		return false, err

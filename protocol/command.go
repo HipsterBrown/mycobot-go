@@ -7,27 +7,10 @@ import (
 
 // Command represents a protocol command to send to the robot
 type Command struct {
-	Code   byte
-	Data   []byte
-	UseCRC bool // when true, uses XOR checksum instead of 0xFA footer
-}
-
-// NewCommand creates a command without data
-func NewCommand(code byte) Command {
-	return Command{
-		Code:   code,
-		Data:   nil,
-		UseCRC: false,
-	}
-}
-
-// NewCommandWithData creates a command with data payload
-func NewCommandWithData(code byte, data []byte) Command {
-	return Command{
-		Code:   code,
-		Data:   data,
-		UseCRC: false,
-	}
+	Code     byte
+	Data     []byte
+	UseCRC   bool // when true, uses XOR checksum instead of 0xFA footer
+	HasReply bool // when true, the caller expects a response frame from the firmware
 }
 
 // Encode converts the command to wire format
@@ -73,66 +56,59 @@ type Response struct {
 	Data []byte
 }
 
-// Decode parses wire format response into Response struct
-func Decode(data []byte, useCRC bool) (*Response, error) {
+// Decode parses the next wire-format frame from data. It returns the decoded
+// Response, the number of bytes the frame occupies (so callers can advance a
+// streaming buffer), and an error if the frame is malformed or incomplete.
+func Decode(data []byte, useCRC bool) (*Response, int, error) {
 	if len(data) < 5 {
-		return nil, fmt.Errorf("response too short: %d bytes", len(data))
+		return nil, 0, fmt.Errorf("response too short: %d bytes", len(data))
 	}
 
-	// Validate header
 	if data[0] != Header || data[1] != Header {
-		return nil, fmt.Errorf("invalid header: %#x %#x", data[0], data[1])
+		return nil, 0, fmt.Errorf("invalid header: %#x %#x", data[0], data[1])
 	}
 
 	length := int(data[2])
-	code := data[3]
 
-	// Calculate expected total length
 	// Format: [Header Header Length Code Data... Footer/CRC]
-	// For non-CRC: length = Code + Data + Footer
-	// For CRC: length = Code + Data + (length marker) + CRC (hence one extra byte in formula)
-	var expectedLen int
+	// Non-CRC length counts Code + Data + Footer;
+	// CRC length additionally counts the CRC byte.
+	var frameSize int
 	if useCRC {
-		expectedLen = length + 2 // headers(2)
+		frameSize = length + 2 // headers(2)
 	} else {
-		expectedLen = length + 3 // headers(2) + length_byte(1)
+		frameSize = length + 3 // headers(2) + length_byte(1)
 	}
 
-	if len(data) < expectedLen {
-		return nil, fmt.Errorf("incomplete response: expected %d, got %d", expectedLen, len(data))
+	if len(data) < frameSize {
+		return nil, 0, fmt.Errorf("incomplete response: expected %d, got %d", frameSize, len(data))
 	}
 
-	// Validate CRC or footer
+	frame := data[:frameSize]
+
 	if useCRC {
-		expectedCRC := calculateCRC(data[:len(data)-1])
-		actualCRC := data[len(data)-1]
+		expectedCRC := calculateCRC(frame[:frameSize-1])
+		actualCRC := frame[frameSize-1]
 		if expectedCRC != actualCRC {
-			return nil, fmt.Errorf("CRC mismatch: expected %#x, got %#x", expectedCRC, actualCRC)
+			return nil, 0, fmt.Errorf("CRC mismatch: expected %#x, got %#x", expectedCRC, actualCRC)
 		}
-	} else {
-		footer := data[len(data)-1]
-		if footer != Footer {
-			return nil, fmt.Errorf("invalid footer: %#x", footer)
-		}
+	} else if frame[frameSize-1] != Footer {
+		return nil, 0, fmt.Errorf("invalid footer: %#x", frame[frameSize-1])
 	}
 
-	// Extract data payload
-	var payload []byte
 	var dataLen int
 	if useCRC {
-		dataLen = length - 3 // subtract code, length indicator, and CRC
+		dataLen = length - 3 // code + length indicator + CRC
 	} else {
-		dataLen = length - 2 // subtract code and footer
+		dataLen = length - 2 // code + footer
 	}
+	var payload []byte
 	if dataLen > 0 {
 		payload = make([]byte, dataLen)
-		copy(payload, data[4:4+dataLen])
+		copy(payload, frame[4:4+dataLen])
 	}
 
-	return &Response{
-		Code: code,
-		Data: payload,
-	}, nil
+	return &Response{Code: frame[3], Data: payload}, frameSize, nil
 }
 
 // EncodeInt16 encodes an integer as big-endian int16

@@ -65,11 +65,12 @@ func TestDecode_ValidResponse(t *testing.T) {
 	// Simulate response: [FE FE 05 20 01 02 03 FA]
 	data := []byte{0xFE, 0xFE, 0x05, 0x20, 0x01, 0x02, 0x03, 0xFA}
 
-	resp, err := Decode(data, false)
+	resp, n, err := Decode(data, false)
 	require.NoError(t, err)
 
 	assert.Equal(t, byte(0x20), resp.Code)
 	assert.Equal(t, []byte{0x01, 0x02, 0x03}, resp.Data)
+	assert.Equal(t, len(data), n)
 }
 
 func TestDecode_ValidResponseWithCRC(t *testing.T) {
@@ -78,17 +79,30 @@ func TestDecode_ValidResponseWithCRC(t *testing.T) {
 	crc := calculateCRC(packet)
 	data := append(packet, crc)
 
-	resp, err := Decode(data, true)
+	resp, n, err := Decode(data, true)
 	require.NoError(t, err)
 
 	assert.Equal(t, byte(0x12), resp.Code)
 	assert.Equal(t, []byte{0xAA}, resp.Data)
+	assert.Equal(t, len(data), n)
+}
+
+func TestDecode_ReturnsFrameSizeWithTrailingBytes(t *testing.T) {
+	// Frame followed by the start of a second frame in the same buffer.
+	frame := []byte{0xFE, 0xFE, 0x03, 0x12, 0x01, 0xFA}
+	trailing := []byte{0xFE, 0xFE, 0x02}
+	data := append(append([]byte{}, frame...), trailing...)
+
+	resp, n, err := Decode(data, false)
+	require.NoError(t, err)
+	assert.Equal(t, len(frame), n)
+	assert.Equal(t, byte(0x12), resp.Code)
 }
 
 func TestDecode_InvalidHeader(t *testing.T) {
 	data := []byte{0xAA, 0xFE, 0x02, 0x10, 0xFA}
 
-	_, err := Decode(data, false)
+	_, _, err := Decode(data, false)
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "invalid header")
 }
@@ -96,7 +110,7 @@ func TestDecode_InvalidHeader(t *testing.T) {
 func TestDecode_TooShort(t *testing.T) {
 	data := []byte{0xFE, 0xFE}
 
-	_, err := Decode(data, false)
+	_, _, err := Decode(data, false)
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "too short")
 }
@@ -104,7 +118,7 @@ func TestDecode_TooShort(t *testing.T) {
 func TestDecode_InvalidCRC(t *testing.T) {
 	data := []byte{0xFE, 0xFE, 0x03, 0x10, 0xFF} // wrong CRC
 
-	_, err := Decode(data, true)
+	_, _, err := Decode(data, true)
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "CRC mismatch")
 }
@@ -112,7 +126,7 @@ func TestDecode_InvalidCRC(t *testing.T) {
 func TestDecode_InvalidFooter(t *testing.T) {
 	data := []byte{0xFE, 0xFE, 0x02, 0x10, 0xAA} // wrong footer
 
-	_, err := Decode(data, false)
+	_, _, err := Decode(data, false)
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "invalid footer")
 }

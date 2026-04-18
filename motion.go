@@ -47,8 +47,8 @@ func (m *Motion) JogAngle(ctx context.Context, joint types.JointID, direction ty
 
 	data := []byte{byte(joint), byte(direction), byte(speed)}
 	cmd := protocol.Command{
-		Code: protocol.JogAngle,
-		Data: data,
+		Code:     protocol.JogAngle,
+		Data:     data,
 	}
 
 	_, err := m.robot.SendCommand(ctx, cmd)
@@ -66,8 +66,8 @@ func (m *Motion) JogCoord(ctx context.Context, axis CoordAxis, direction types.D
 
 	data := []byte{byte(axis + 1), byte(direction), byte(speed)}
 	cmd := protocol.Command{
-		Code: protocol.JogCoord,
-		Data: data,
+		Code:     protocol.JogCoord,
+		Data:     data,
 	}
 
 	_, err := m.robot.SendCommand(ctx, cmd)
@@ -104,7 +104,7 @@ func (m *Motion) Stop(ctx context.Context) error {
 
 // IsPaused returns true if robot is paused
 func (m *Motion) IsPaused(ctx context.Context) (bool, error) {
-	cmd := protocol.Command{Code: protocol.IsPaused}
+	cmd := protocol.Command{Code: protocol.IsPaused, HasReply: true}
 	data, err := m.robot.SendCommand(ctx, cmd)
 	if err != nil {
 		return false, err
@@ -127,8 +127,9 @@ func (m *Motion) SendAngle(ctx context.Context, joint types.JointID, angle types
 	data = append(data, byte(speed))
 
 	cmd := protocol.Command{
-		Code: protocol.SendAngle,
-		Data: data,
+		Code:     protocol.SendAngle,
+		Data:     data,
+		HasReply: true,
 	}
 	_, err := m.robot.SendCommand(ctx, cmd)
 	return err
@@ -153,8 +154,9 @@ func (m *Motion) SendCoord(ctx context.Context, axis CoordAxis, value float64, s
 	data = append(data, byte(speed))
 
 	cmd := protocol.Command{
-		Code: protocol.SendCoord,
-		Data: data,
+		Code:     protocol.SendCoord,
+		Data:     data,
+		HasReply: true,
 	}
 	_, err := m.robot.SendCommand(ctx, cmd)
 	return err
@@ -175,8 +177,9 @@ func (m *Motion) IsInPosition(ctx context.Context, data []float64, flag Position
 	encoded = append(encoded, byte(flag))
 
 	cmd := protocol.Command{
-		Code: protocol.IsInPosition,
-		Data: encoded,
+		Code:     protocol.IsInPosition,
+		Data:     encoded,
+		HasReply: true,
 	}
 	resp, err := m.robot.SendCommand(ctx, cmd)
 	if err != nil {
