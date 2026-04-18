@@ -58,17 +58,3 @@ func TestMechArm270_SendAngles_OutOfRange(t *testing.T) {
 	assert.Contains(t, err.Error(), "out of range")
 }
 
-func TestMechArm270_HasMotionSubsystem(t *testing.T) {
-	arm := NewMechArm270("/dev/ttyUSB0")
-	assert.NotNil(t, arm.Motion)
-}
-
-func TestMechArm270_HasIOSubsystem(t *testing.T) {
-	arm := NewMechArm270("/dev/ttyUSB0")
-	assert.NotNil(t, arm.IO)
-}
-
-func TestMechArm270_HasServoSubsystem(t *testing.T) {
-	arm := NewMechArm270("/dev/ttyUSB0")
-	assert.NotNil(t, arm.Servo)
-}

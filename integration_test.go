@@ -118,9 +118,9 @@ func TestIntegration_JogAndStop(t *testing.T) {
 	time.Sleep(500 * time.Millisecond)
 
 	// Jog joint 1 positive at slow speed, then immediately stop
-	require.NoError(t, arm.Motion.JogAngle(ctx, types.Joint1, types.DirPositive, types.SpeedSlow))
+	require.NoError(t, arm.JogAngle(ctx, types.Joint1, types.DirPositive, types.SpeedSlow))
 	time.Sleep(200 * time.Millisecond)
-	require.NoError(t, arm.Motion.JogStop(ctx))
+	require.NoError(t, arm.JogStop(ctx))
 }
 
 func TestIntegration_ReadEncoders(t *testing.T) {
@@ -131,7 +131,7 @@ func TestIntegration_ReadEncoders(t *testing.T) {
 	require.NoError(t, arm.PowerOn(ctx))
 	time.Sleep(500 * time.Millisecond)
 
-	encoders, err := arm.Servo.GetEncoders(ctx)
+	encoders, err := arm.GetEncoders(ctx)
 	require.NoError(t, err)
 	assert.Len(t, encoders, 6, "MechArm270 should return 6 encoder values")
 
@@ -148,7 +148,7 @@ func TestIntegration_SetColor(t *testing.T) {
 	defer cancel()
 
 	// Set LED to green, then off
-	require.NoError(t, arm.IO.SetColor(ctx, 0, 255, 0))
+	require.NoError(t, arm.SetColor(ctx, 0, 255, 0))
 	time.Sleep(500 * time.Millisecond)
-	require.NoError(t, arm.IO.SetColor(ctx, 0, 0, 0))
+	require.NoError(t, arm.SetColor(ctx, 0, 0, 0))
 }

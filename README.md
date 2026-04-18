@@ -11,7 +11,7 @@ Go library for controlling [Elephant Robotics](https://www.elephantrobotics.com/
 - Thread-safe serial communication via a dedicated command goroutine
 - Context-based timeout and cancellation on all commands
 - Strongly-typed API with validated domain types (angles, speed, coordinates, joint IDs)
-- Subsystem-based design: Motion, IO, and Servo controls exposed as fields
+- Flat API: every opcode is a method on the model type (matches pymycobot's shape)
 - Exposed protocol layer for advanced/raw command usage
 - Correct wire protocol encoding verified against pymycobot source
 
@@ -63,7 +63,7 @@ func main() {
 
 ### Robot
 
-`MechArm270` implements the `Robot` interface and exposes three subsystems:
+`MechArm270` exposes the full opcode surface as methods directly on the type:
 
 ```go
 arm := mycobot.NewMechArm270("/dev/ttyUSB0")
@@ -79,11 +79,6 @@ arm.GetAngles(ctx)
 arm.SendCoords(ctx, coord, speed, mode)
 arm.GetCoords(ctx)
 arm.IsMoving(ctx)
-
-// Subsystems
-arm.Motion   // JOG, single joint/axis moves, pause/resume/stop
-arm.IO       // Atom digital pins, PWM, LED color
-arm.Servo    // Individual servo control, encoders, calibration
 ```
 
 ### Options
@@ -96,52 +91,52 @@ arm := mycobot.NewMechArm270("/dev/ttyUSB0", mycobot.WithBaudRate(1000000))
 arm := mycobot.NewMechArm270("/dev/ttyUSB0", mycobot.WithCRC())
 ```
 
-### Motion Subsystem
+### Motion (MDI + JOG)
 
 ```go
 // JOG (incremental movement)
-arm.Motion.JogAngle(ctx, types.Joint1, types.DirPositive, types.SpeedSlow)
-arm.Motion.JogCoord(ctx, mycobot.AxisX, types.DirNegative, types.SpeedSlow)
-arm.Motion.JogStop(ctx)
+arm.JogAngle(ctx, types.Joint1, types.DirPositive, types.SpeedSlow)
+arm.JogCoord(ctx, types.AxisX, types.DirNegative, types.SpeedSlow)
+arm.JogStop(ctx)
 
 // Single joint/axis control
-arm.Motion.SendAngle(ctx, types.Joint3, types.Angle(45.0), types.SpeedMedium)
-arm.Motion.SendCoord(ctx, mycobot.AxisZ, 200.0, types.SpeedMedium)
+arm.SendAngle(ctx, types.Joint3, types.Angle(45.0), types.SpeedMedium)
+arm.SendCoord(ctx, types.AxisZ, 200.0, types.SpeedMedium)
 
 // Movement control
-arm.Motion.Pause(ctx)
-arm.Motion.Resume(ctx)
-arm.Motion.Stop(ctx)
-arm.Motion.IsPaused(ctx)
+arm.Pause(ctx)
+arm.Resume(ctx)
+arm.Stop(ctx)
+arm.IsPaused(ctx)
 
 // Position check
-arm.Motion.IsInPosition(ctx, angleValues, mycobot.PositionAngles)
-arm.Motion.IsInPosition(ctx, coordValues, mycobot.PositionCoords)
+arm.IsInPosition(ctx, angleValues, types.PositionAngles)
+arm.IsInPosition(ctx, coordValues, types.PositionCoords)
 ```
 
-### IO Subsystem (Atom end-effector)
+### Atom IO (end-effector)
 
 ```go
-arm.IO.SetPinMode(ctx, pin, mycobot.PinOutput)
-arm.IO.SetDigitalOutput(ctx, pin, mycobot.SignalHigh)
-signal, _ := arm.IO.GetDigitalInput(ctx, pin)
-arm.IO.SetColor(ctx, 255, 0, 0) // red LED
+arm.SetPinMode(ctx, pin, types.PinOutput)
+arm.SetDigitalOutput(ctx, pin, types.SignalHigh)
+signal, _ := arm.GetDigitalInput(ctx, pin)
+arm.SetColor(ctx, 255, 0, 0) // red LED
 ```
 
-### Servo Subsystem
+### Servo / Encoders
 
 ```go
-arm.Servo.ReleaseServo(ctx, types.Joint1) // free movement
-arm.Servo.FocusServo(ctx, types.Joint1)   // re-engage
-enabled, _ := arm.Servo.IsServoEnabled(ctx, types.Joint1)
+arm.ReleaseServo(ctx, types.Joint1) // free movement
+arm.FocusServo(ctx, types.Joint1)   // re-engage
+enabled, _ := arm.IsServoEnabled(ctx, types.Joint1)
 
 // Encoder values (0-4096)
-enc, _ := arm.Servo.GetEncoder(ctx, types.Joint1)
-encoders, _ := arm.Servo.GetEncoders(ctx)
+enc, _ := arm.GetEncoder(ctx, types.Joint1)
+encoders, _ := arm.GetEncoders(ctx)
 
 // Joint limits from firmware
-min, _ := arm.Servo.GetJointMin(ctx, types.Joint1)
-max, _ := arm.Servo.GetJointMax(ctx, types.Joint1)
+min, _ := arm.GetJointMin(ctx, types.Joint1)
+max, _ := arm.GetJointMax(ctx, types.Joint1)
 ```
 
 ### Coordinate Modes
@@ -188,11 +183,8 @@ The integration tests will:
 
 ```
 mycobot-go/
+  base.go            # transport + opcode methods shared across models
   mecharm270.go      # MechArm270 robot implementation
-  robot.go           # Robot interface
-  motion.go          # Motion subsystem (JOG, single moves, pause/stop)
-  io.go              # Atom IO subsystem (pins, PWM, LED)
-  servo.go           # Servo subsystem (encoders, calibration, limits)
   config.go          # Model-specific configuration
   option.go          # Functional options (WithBaudRate, WithCRC)
   errors.go          # Error types
@@ -207,8 +199,9 @@ mycobot-go/
     coord_mode.go    # CoordMode (angular/linear)
     direction.go     # Direction (negative/positive)
     model.go         # Model type, joint limits
+    pin.go           # PinMode, PinSignal
+    axis.go          # CoordAxis, PositionFlag
   internal/
-    robot/base.go    # Serial connection, command queue goroutine
     errors/          # Internal error sentinels
 ```
 

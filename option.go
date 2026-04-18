@@ -1,21 +1,15 @@
 package mycobot
 
-import "github.com/hipsterbrown/mycobot-go/internal/robot"
+// Option configures a robot client.
+type Option func(*base)
 
-// Option configures a robot
-type Option func(*robot.Base)
-
-// WithBaudRate sets custom baud rate
+// WithBaudRate overrides the default baud rate for the port.
 func WithBaudRate(baud int) Option {
-	return func(b *robot.Base) {
-		b.SetBaudRate(baud)
-	}
+	return func(b *base) { b.SetBaudRate(baud) }
 }
 
-// WithCRC enables CRC mode for firmware that requires it.
-// By default, the standard 0xFA footer is used (matching pymycobot defaults).
+// WithCRC enables CRC framing for firmware that requires it.
+// Default is the 0xFA footer used by MechArm 270 / MyCobot 280.
 func WithCRC() Option {
-	return func(b *robot.Base) {
-		b.SetUseCRC(true)
-	}
+	return func(b *base) { b.SetUseCRC(true) }
 }
