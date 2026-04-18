@@ -204,8 +204,6 @@ mycobot-go/
     model.go         # Model type, joint limits
     pin.go           # PinMode, PinSignal
     axis.go          # CoordAxis, PositionFlag
-  internal/
-    errors/          # Internal error sentinels
 ```
 
 ## License

@@ -24,3 +24,6 @@ go.work
 
 # OS
 .DS_Store
+
+# Claude Code worktree scratch space
+.claude/
