@@ -212,11 +212,6 @@ mycobot-go/
     errors/          # Internal error sentinels
 ```
 
-## Documentation
-
-- [Design document](docs/plans/2026-04-15-successor-plan-design.md)
-- [Implementation plan](docs/plans/2026-04-15-successor-plan-implementation.md)
-
 ## License
 
 MIT
