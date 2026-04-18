@@ -6,23 +6,7 @@ import (
 
 	"github.com/hipsterbrown/mycobot-go/internal/robot"
 	"github.com/hipsterbrown/mycobot-go/protocol"
-)
-
-// PinMode configures a pin's behavior
-type PinMode int
-
-const (
-	PinInput       PinMode = 0
-	PinOutput      PinMode = 1
-	PinInputPullup PinMode = 2
-)
-
-// PinSignal represents a digital pin state
-type PinSignal int
-
-const (
-	SignalLow  PinSignal = 0
-	SignalHigh PinSignal = 1
+	"github.com/hipsterbrown/mycobot-go/types"
 )
 
 // IO provides Atom IO operations (end-effector head, 0x60 range)
@@ -31,7 +15,7 @@ type IO struct {
 }
 
 // SetPinMode configures a pin as input, output, or input with pullup
-func (io *IO) SetPinMode(ctx context.Context, pin int, mode PinMode) error {
+func (io *IO) SetPinMode(ctx context.Context, pin int, mode types.PinMode) error {
 	cmd := protocol.Command{
 		Code:     protocol.SetPinMode,
 		Data:     []byte{byte(pin), byte(mode)},
@@ -41,7 +25,7 @@ func (io *IO) SetPinMode(ctx context.Context, pin int, mode PinMode) error {
 }
 
 // SetDigitalOutput sets a digital pin high or low
-func (io *IO) SetDigitalOutput(ctx context.Context, pin int, signal PinSignal) error {
+func (io *IO) SetDigitalOutput(ctx context.Context, pin int, signal types.PinSignal) error {
 	cmd := protocol.Command{
 		Code:     protocol.SetDigitalOutput,
 		Data:     []byte{byte(pin), byte(signal)},
@@ -51,7 +35,7 @@ func (io *IO) SetDigitalOutput(ctx context.Context, pin int, signal PinSignal) e
 }
 
 // GetDigitalInput reads the state of a digital input pin
-func (io *IO) GetDigitalInput(ctx context.Context, pin int) (PinSignal, error) {
+func (io *IO) GetDigitalInput(ctx context.Context, pin int) (types.PinSignal, error) {
 	cmd := protocol.Command{
 		Code:     protocol.GetDigitalInput,
 		Data:     []byte{byte(pin)},
@@ -59,12 +43,12 @@ func (io *IO) GetDigitalInput(ctx context.Context, pin int) (PinSignal, error) {
 	}
 	data, err := io.robot.SendCommand(ctx, cmd)
 	if err != nil {
-		return SignalLow, err
+		return types.SignalLow, err
 	}
 	if len(data) > 0 {
-		return PinSignal(data[0]), nil
+		return types.PinSignal(data[0]), nil
 	}
-	return SignalLow, nil
+	return types.SignalLow, nil
 }
 
 // SetPWMMode configures a pin for PWM output

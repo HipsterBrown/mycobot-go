@@ -9,28 +9,6 @@ import (
 	"github.com/hipsterbrown/mycobot-go/types"
 )
 
-// PositionFlag specifies whether IsInPosition checks angles or coordinates
-type PositionFlag int
-
-const (
-	// PositionAngles checks joint angles
-	PositionAngles PositionFlag = 0
-	// PositionCoords checks coordinates
-	PositionCoords PositionFlag = 1
-)
-
-// CoordAxis represents a coordinate axis for single-axis movement
-type CoordAxis int
-
-const (
-	AxisX CoordAxis = iota
-	AxisY
-	AxisZ
-	AxisRx
-	AxisRy
-	AxisRz
-)
-
 // Motion provides motion control operations
 type Motion struct {
 	robot *robot.Base
@@ -56,7 +34,7 @@ func (m *Motion) JogAngle(ctx context.Context, joint types.JointID, direction ty
 }
 
 // JogCoord performs incremental coordinate movement
-func (m *Motion) JogCoord(ctx context.Context, axis CoordAxis, direction types.Direction, speed types.Speed) error {
+func (m *Motion) JogCoord(ctx context.Context, axis types.CoordAxis, direction types.Direction, speed types.Speed) error {
 	if err := direction.Validate(); err != nil {
 		return err
 	}
@@ -136,14 +114,14 @@ func (m *Motion) SendAngle(ctx context.Context, joint types.JointID, angle types
 }
 
 // SendCoord moves a single coordinate axis to the specified value
-func (m *Motion) SendCoord(ctx context.Context, axis CoordAxis, value float64, speed types.Speed) error {
+func (m *Motion) SendCoord(ctx context.Context, axis types.CoordAxis, value float64, speed types.Speed) error {
 	if err := speed.Validate(); err != nil {
 		return err
 	}
 
 	// XYZ axes (0-2) use * 10, rotation axes (3-5) use * 100
 	var encoded int
-	if axis <= AxisZ {
+	if axis <= types.AxisZ {
 		encoded = int(value * 10)
 	} else {
 		encoded = int(value * 100)
@@ -164,9 +142,9 @@ func (m *Motion) SendCoord(ctx context.Context, axis CoordAxis, value float64, s
 
 // IsInPosition checks if the robot is at the target position.
 // Use PositionAngles to check joint angles or PositionCoords to check coordinates.
-func (m *Motion) IsInPosition(ctx context.Context, data []float64, flag PositionFlag) (bool, error) {
+func (m *Motion) IsInPosition(ctx context.Context, data []float64, flag types.PositionFlag) (bool, error) {
 	var encoded []byte
-	if flag == PositionAngles {
+	if flag == types.PositionAngles {
 		encoded = protocol.EncodeAngles(data)
 	} else {
 		if len(data) != 6 {
