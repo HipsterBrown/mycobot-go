@@ -10,7 +10,6 @@ import (
 	"time"
 
 	"go.bug.st/serial"
-	internalerrors "github.com/hipsterbrown/mycobot-go/internal/errors"
 	"github.com/hipsterbrown/mycobot-go/protocol"
 	"github.com/hipsterbrown/mycobot-go/types"
 )
@@ -245,7 +244,7 @@ func extractMatchingFrame(buf []byte, expectedCode byte, useCRC bool) (data []by
 // SendCommand queues a command and waits for response
 func (b *base) SendCommand(ctx context.Context, cmd protocol.Command) ([]byte, error) {
 	if !b.IsConnected() {
-		return nil, internalerrors.ErrNotConnected
+		return nil, ErrNotConnected
 	}
 
 	responseChan := make(chan *response, 1)
@@ -262,7 +261,7 @@ func (b *base) SendCommand(ctx context.Context, cmd protocol.Command) ([]byte, e
 		return nil, ctx.Err()
 
 	case <-b.closeChan:
-		return nil, internalerrors.ErrRobotClosed
+		return nil, ErrRobotClosed
 	}
 
 	// Wait for response
