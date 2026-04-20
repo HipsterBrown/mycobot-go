@@ -871,6 +871,7 @@ func newTestArm(t *testing.T, fc *fakeClient) *Arm {
 			{Min: -165, Max: 165}, {Min: -165, Max: 165}, {Min: -175, Max: 175},
 		},
 		defaultSpeed: types.SpeedMedium,
+		pollInterval: time.Millisecond, // keep tests snappy
 	}
 }
 
@@ -968,6 +969,7 @@ type Arm struct {
 	moving       atomic.Bool
 	cancelPoller context.CancelFunc // cancels the most recent completion poller
 	pollerWG     sync.WaitGroup
+	pollInterval time.Duration // 0 means use defaultPollInterval; tests may set a shorter value
 }
 
 // Ensure we satisfy arm.Arm at compile time.
@@ -1155,8 +1157,9 @@ Expected: FAIL with panic from the Task 8 stub.
 Replace the `MoveToJointPositions` stub in `mycobot.go`:
 
 ```go
-// pollInterval is how often we check IsInPosition during a move.
-const pollInterval = 100 * time.Millisecond
+// defaultPollInterval is how often we check IsInPosition during a move. Tests
+// may override Arm.pollInterval to keep the suite fast; zero means use the default.
+const defaultPollInterval = 100 * time.Millisecond
 
 // MoveToJointPositions moves the arm in joint space. Blocks until the firmware
 // reports the target position is reached, ctx is cancelled, or Stop is called.
@@ -1200,7 +1203,11 @@ func (a *Arm) MoveToJointPositions(ctx context.Context, positions []referencefra
 }
 
 func (a *Arm) awaitCompletion(callerCtx, pollCtx context.Context, target []float64, flag types.PositionFlag) error {
-	t := time.NewTicker(pollInterval)
+	interval := a.pollInterval
+	if interval <= 0 {
+		interval = defaultPollInterval
+	}
+	t := time.NewTicker(interval)
 	defer t.Stop()
 	defer func() {
 		a.moving.Store(false)
