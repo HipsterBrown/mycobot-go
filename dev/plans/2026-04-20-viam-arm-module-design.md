@@ -105,8 +105,8 @@ And delegates to a shared constructor in `mycobot.go`.
 | Viam method | Implementation |
 |---|---|
 | `EndPosition(ctx, extra)` | Compute FK on cached URDF model using current `JointPositions` → `spatialmath.Pose`. |
-| `MoveToPosition(ctx, pose, extra)` | Run Viam-side IK against URDF (via the motionplan/referenceframe packages), then `client.SendAngles` at configured speed; block on move-completion polling until done or ctx cancelled. |
-| `MoveToJointPositions(ctx, positions, extra)` | Convert `[]referenceframe.Input` from radians to degrees, validate each against model `JointLimits`, call `client.SendAngles`, block until done. |
+| `MoveToPosition(ctx, pose, extra)` | Run Viam-side IK against URDF (via the motionplan/referenceframe packages), then drive to the resulting joints via `MoveToJointPositions` (shares the same completion-polling path). |
+| `MoveToJointPositions(ctx, positions, extra)` | Convert `[]referenceframe.Input` from radians to degrees, validate each against model `JointLimits`, call `client.SendAngles` at the resolved speed (see "Speed resolution" below), then block on a single per-move completion poll (see "Firmware quirk handling") until `IsInPosition` is true, ctx is cancelled, or `Stop` is called. |
 | `MoveThroughJointPositions(ctx, positions, options, extra)` | Loop over waypoints calling `MoveToJointPositions`. No firmware-level blending. |
 | `JointPositions(ctx, extra)` | `client.GetAngles` → convert degrees to radians → `[]referenceframe.Input`. |
 | `Stop(ctx, extra)` | `client.Stop`; clear in-flight-move flag. |
@@ -127,6 +127,15 @@ Workaround: `IsMoving` reads a module-owned `atomic.Bool` rather than querying t
 
 This matches how Viam motion service expects `IsMoving` to behave (cheap, non-blocking) and avoids the stall trap.
 
+### Speed resolution
+
+`mycobot-go`'s `SendAngles` requires a `types.Speed` (0-100). The module resolves it per move in this order:
+
+1. If the call's `extra map[string]interface{}` has a numeric `"speed"` key, clamp to 0-100 and use it.
+2. Otherwise, use the module's current default speed.
+
+Default speed starts at `types.SpeedMedium` (50). A `DoCommand` entry `{"command": "set_default_speed", "speed": <int>}` updates it atomically at runtime. No `speed` field is added to `Config` — speed is per-move, not a static machine parameter.
+
 ### Angle units
 
 `mycobot-go` exposes degrees; Viam `referenceframe.Input` is radians for revolute joints. `mycobot.go` is the only place conversion happens.
@@ -139,6 +148,7 @@ Expose non-arm-API mycobot-go features via `DoCommand`'s `command` key:
 - `set_pin_mode` / `set_digital_output` / `get_digital_input`
 - `jog_angle` / `jog_coord` / `jog_stop`
 - `release_servo` / `focus_servo`
+- `set_default_speed` — updates the default move speed (see "Speed resolution" above)
 
 Each command parses its own args and returns a result map. Unknown commands return an error.
 
@@ -177,6 +187,10 @@ This catches gross URDF authoring errors without requiring hardware. Firmware-vs
 - `kinematics/mecharm270.urdf` — lands with v0 of the module.
 - Other MyCobot variants land incrementally as `mycobot-go` adds support. Each new model introduces one file and one `models.go` entry.
 
+### `meta.json` per-model declaration
+
+`meta.json` declares one `models` entry per supported model triple (standard Viam pattern). v0 ships a single entry for `hipsterbrown:mycobot:mecharm270`; each future model adds another entry plus its URDF. The binary is shared — all models run from the same `cmd/module/main.go`.
+
 ## Lifecycle and error handling
 
 ### Construction
@@ -192,7 +206,9 @@ Any error from steps 1–4 is returned to Viam; the runtime will retry reconfigu
 
 ### Reconfigure
 
-`Reconfigure` compares the new `Config` against the current one. If `serial_port`, `baud_rate`, `use_crc`, or `default_timeout` changed, close the old client, construct a new one, and re-open. Otherwise no-op (the kinematics model is immutable per model).
+`Reconfigure` compares the new `Config` against the current one. If any transport-affecting field changed (`serial_port`, `baud_rate`, `use_crc`, `default_timeout`), close the old client, construct a new one, and re-open. Otherwise no-op (the kinematics model is immutable per model).
+
+Implementation note: the comparison uses a single `transportKey()` helper that derives a comparable value from the `Config`. Adding a transport-affecting field later is a one-line change in that helper — callers don't have to update a list.
 
 ### Close
 
