@@ -229,7 +229,7 @@ Wrap mycobot-go errors with `fmt.Errorf("mycobot <op>: %w", err)` so callers pre
 
 Three layers, all runnable via `go test ./...`:
 
-1. **Config** (`config_test.go`) — `Validate` happy paths and every failure case: missing `serial_port`, unsupported baud, unparseable timeout.
+1. **Config** (`config_test.go`) — `Validate` happy paths and every failure case: missing `serial_port`, unsupported baud, unparsable timeout.
 2. **Arm with fake client** (`mycobot_test.go`) — define the narrow `client` interface, inject a fake that records calls. Cover:
    - `MoveToJointPositions` converts radians → degrees correctly and calls `SendAngles` with the right `types.Speed`.
    - Joint-limit validation rejects out-of-range targets before any wire call.
@@ -239,6 +239,28 @@ Three layers, all runnable via `go test ./...`:
 3. **Kinematics** (`mycobot_test.go`) — FK round-trip table per registered model.
 
 Integration testing against real hardware is manual and out of scope for this module's CI.
+
+## Scaffolding command (non-interactive)
+
+`viam module generate` (CLI ≥ 0.122.0) launches an interactive TUI when run without flags. To scaffold non-interactively from a plan, pass every prompt value on the command line:
+
+```bash
+viam module generate \
+  --name=mycobot \
+  --language=go \
+  --visibility=public \
+  --public-namespace=hipsterbrown \
+  --resource-subtype=arm \
+  --model-name=mecharm270
+```
+
+Notes:
+- `--name=mycobot` is the **module name** (the middle segment of the triple `hipsterbrown:mycobot:mecharm270`). The CLI creates a directory called `mycobot/`; after generation, rename it to `viam-mycobot/` for the final repo name, or run the command inside a scratch directory and move contents.
+- `--register` is omitted — it would push an entry to the Viam backend, which we defer to explicit `viam module create` / `viam module upload` later.
+- `--visibility=public` because the module will eventually publish to the registry. Use `private` if ownership shifts to a private namespace first.
+- Only one model (`mecharm270`) is scaffolded via the CLI. Additional models (MyCobot 280, etc.) are added by appending entries to `models.go` and `meta.json` directly — no second `viam module generate` run.
+
+Expected output: new `mycobot/` directory with the layout shown in "Repo layout" above, containing a `mecharm270.go` stub (which we then split into `mycobot.go` + `models.go` + `config.go` + `kinematics.go` per this design).
 
 ## Build and publish
 
